@@ -49,6 +49,7 @@ def newRound():
         time.sleep(DELAY)
         enable_buttons()
     
+# Functions that display the text when someone wins
 
 def player_win():
     global PLAYER_SCORE, NICO_SCORE
@@ -78,8 +79,9 @@ def nico_win():
     player_move.update()
     NICO_SCORE += 1
 
+# Functions that depend on the exact move the human plays
 
-def isrock():
+def playRock():
     global PLAYER_SCORE, NICO_SCORE, DELAY
     disable_buttons()
     nico_move = random_move()
@@ -101,7 +103,7 @@ def isrock():
     newRound()
 
 
-def ispaper():
+def playPaper():
     global PLAYER_SCORE, NICO_SCORE
     disable_buttons()
     nico_move = random_move()
@@ -123,7 +125,7 @@ def ispaper():
     newRound()
  
 
-def isscissor():
+def playScissor():
     global PLAYER_SCORE, NICO_SCORE
     disable_buttons()
     nico_move = random_move()
@@ -194,15 +196,15 @@ frame1.pack()
  
 b1 = Button(frame1, text = "Rock",
             font = 10, width = 20, height = 10,
-            command = isrock)
+            command = playRock)
  
 b2 = Button(frame1, text = "Paper ",
             font = 10, width = 20, height = 10,
-            command = ispaper)
+            command = playPaper)
  
 b3 = Button(frame1, text = "Scissor",
             font = 10, width = 20, height = 10,
-            command = isscissor)
+            command = playScissor)
 b1.pack(side = LEFT, padx = 10, pady = 20)
 b2.pack(side = LEFT,padx = 10, pady = 20)
 b3.pack(padx = 10, pady = 20)
