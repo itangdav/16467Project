@@ -69,17 +69,21 @@ function App() {
     return [
       {
         id: String(startId),
-        message: "Please pick your move:",
+        message: "I've decided my move. Please pick your move:",
         trigger: String(startId + 1),
       },
       {
         id: String(startId + 1),
-        component: <RPS />,
-        trigger: String(startId + 2),
+        // component: <RPS />,
+        options: [
+          { value: 1, label: "Rock", trigger: String(startId + 2) },
+          { value: 2, label: "Paper", trigger: String(startId + 2) },
+          { value: 2, label: "Scissors", trigger: String(startId + 2) },
+        ],
       },
       {
         id: String(startId + 2),
-        message: "I win!",
+        message: "Mine is Scissors. I win!",
         trigger: String(startId + 3),
       }
     ]
