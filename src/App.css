@@ -1,0 +1,6 @@
+.App {
+  text-align: center;
+  position: absolute;
+  margin-left: calc(50% - 175px);
+  top: calc(50% - 260px);
+}
