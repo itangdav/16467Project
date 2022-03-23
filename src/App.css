@@ -4,3 +4,27 @@
   margin-left: calc(50% - 175px);
   top: calc(50% - 260px);
 }
+
+.rps-component {
+  margin: 5px;
+  width: 100%;
+  height: 100%;
+  display: flex;
+}
+
+.robot-move {
+  width: 20%;
+  margin: 10px;
+  border: 1px solid;
+  border-radius: 10px;
+  padding: 10px;
+  margin-right: auto;
+}
+
+.human-move {
+  width: 20%;
+  margin: 10px;
+  border: 1px solid;
+  border-radius: 10px;
+  padding: 10px;
+}
