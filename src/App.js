@@ -1,23 +1,97 @@
+import React, { useState, useEffect } from 'react';
+
 import './App.css';
 import ChatBot from 'react-simple-chatbot';
-import PaperIcon from './icons/paper.svg';
+import ButtonGroup from './components/ButtonGroup';
 import RockIcon from './icons/rock.svg';
+import PaperIcon from './icons/paper.svg';
 import ScissorIcon from './icons/scissors.svg';
 
-function RPS() {
+const MoveIcons = [RockIcon, PaperIcon, ScissorIcon];
+const MoveNames = ["Rock", "Paper", "Scissors", "Shoot"];
+
+function getGameStatus(robotMove, humanMove, saidByRobot) {
+  console.log(robotMove, humanMove);
+  let res = (humanMove - robotMove + 3) % 3;
+  if (res == 1) {
+    if (saidByRobot) return "robot-lose";
+    return "Human Wins!";
+  } else if (res == 2) {
+    if (saidByRobot) return "robot-win";
+    return "Robot Wins!";
+  } else {
+    if (saidByRobot) return "tie";
+    return "Tie!";
+  }
+}
+
+function RPS({setSelected, triggerNextStep}) {
+  const [localSelected, setLocalSelected] = useState(null);
+  const [count, setCount] = useState(0);
+
+  let randomMove = 2; //
+
+  const [textDisplay, setTextDisplay] = useState("Pick a Move!");
+
+  useEffect(() => {
+    if (localSelected != null && count < 4) {
+      console.log("Hi!");
+      setTextDisplay(MoveNames[count]+"!");
+      setTimeout(() => {
+        setCount(count+1);
+      }, 1000);
+    }
+    if (count == 4) {
+      setTextDisplay(getGameStatus(2, localSelected, false));
+      triggerNextStep({trigger: getGameStatus(2, localSelected, true)});
+    }
+  }, [localSelected, count]);
+
+  const pickDisplay = 
+  <div className="rps-display">
+    <ButtonGroup 
+      buttons={[
+        {
+          label: "rock",
+          content: <img src={RockIcon} />, 
+        },
+        {
+          label: "paper",
+          content: <img src={PaperIcon} />,
+        },
+        {
+          label: "scissor",
+          content: <img src={ScissorIcon} />
+        }, 
+      ]}
+      setSelected={(i) => {
+        setSelected(i);
+        setLocalSelected(i);
+      }}
+    />
+  </div>;
+
+  const playingDisplay = 
+  <div className="rps-display">
+    <div className={"move human-move" + (count<4 ? " rps-in-play":"")}>
+      <img src={MoveIcons[randomMove]}/>
+    </div>
+    <div className={"move human-move" + (count<4 ? " rps-in-play":"")}>
+      <img src={MoveIcons[localSelected]}/>
+    </div>
+  </div>;
+
   return (
     <div className="rps-component">
-      <div className="robot-move">
-        <img src={PaperIcon} />
-      </div>
-      <div className="human-move">
-        <img src={RockIcon} />
-      </div>
+      <h2 className="rps-text">{textDisplay}</h2>
+      {localSelected==null ? pickDisplay : playingDisplay}
     </div>
   )
 }
 
 function App() {
+  const [prevMove, setPrevMove] = useState(null);
+
   const starter = [
     {
       id: '1',
@@ -69,40 +143,65 @@ function App() {
     return [
       {
         id: String(startId),
-        message: "I've decided my move. Please pick your move:",
-        trigger: String(startId + 1),
+        component: <RPS setSelected={setPrevMove}/>,
+        waitAction: true,
       },
-      {
-        id: String(startId + 1),
-        // component: <RPS />,
-        options: [
-          { value: 1, label: "Rock", trigger: String(startId + 2) },
-          { value: 2, label: "Paper", trigger: String(startId + 2) },
-          { value: 2, label: "Scissors", trigger: String(startId + 2) },
-        ],
-      },
-      {
-        id: String(startId + 2),
-        message: "Mine is Scissors. I win!",
-        trigger: String(startId + 3),
-      }
     ]
   }
 
-  let steps = starter.concat(newRound(starter.length + 1));
+  const declare = [
+    {
+      id: 'robot-win',
+      message: "I WIN :D",
+      trigger: "thank",
+    },
+    {
+      id: 'robot-lose',
+      message: "i lost :(",
+      trigger: "thank",
+    },
+    {
+      id: 'tie',
+      message: "Oh, a tie.",
+      trigger: "thank",
+    }
+  ];
+
+  let steps = starter.concat(newRound(starter.length + 1)).concat(declare);
   steps.push({
-    id: String(steps.length + 1),
+    id: 'thank',
     message: "Thank you for playing!",
     end: true,
   });
 
+  console.log(prevMove);
+
   return (
     <div className="App">
-      {/* <header className="App-header"> </header> */}
-      {/* <RPS /> */}
-
       <ChatBot
         steps={steps}
+        // steps={[
+        //   {
+        //     id: '1',
+        //     component: <RPS setSelected={setPrevMove}/>,
+        //     waitAction: true,
+        //   },
+        //   {
+        //     id: 'robot-win',
+        //     message: "I WIN :D",
+        //     end: true,
+        //   },
+        //   {
+        //     id: 'robot-lose',
+        //     message: "i lost :(",
+        //     end: true,
+        //   },
+        //   {
+        //     id: 'tie',
+        //     message: "Oh, a tie.",
+        //     end: true,
+        //   }
+        // ]}
       />
     </div>
   );
