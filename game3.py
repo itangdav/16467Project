@@ -5,10 +5,15 @@ import random
 import time
  
 root = Tk()
-root.geometry("1600x1000")
 
+SCALE = 2
 PLAYER_SCORE = 0
 NICO_SCORE = 0
+
+width = 1600 // SCALE 
+height = 1000 // SCALE
+
+root.geometry(str(width) +"x"+str(height))
 
 # Computer Values For Moves
 computer_value = {
@@ -57,26 +62,26 @@ def newRound():
     
 def getPlayerMoveImage(i):
     player_bubble_image = Image.open("bubble.png").convert("RGBA")
-    player_bubble_resize_image = player_bubble_image.resize((300, 300))
+    player_bubble_resize_image = player_bubble_image.resize((300//SCALE, 300//SCALE))
 
     if i != "":
         rock_image = Image.open(i+".jpg").convert("RGBA")
-        rock_resize_image = rock_image.resize((100,100))
+        rock_resize_image = rock_image.resize((100//SCALE,100//SCALE))
 
-        player_bubble_resize_image.paste(rock_resize_image, (110,90), rock_resize_image)
+        player_bubble_resize_image.paste(rock_resize_image, (110//SCALE,90//SCALE), rock_resize_image)
 
     return ImageTk.PhotoImage(player_bubble_resize_image)
 
 def getNicoMoveImage(i):
     nico_bubble_image = Image.open("bubble.png").convert("RGBA")
     nico_bubble_image = nico_bubble_image.transpose(Image.FLIP_LEFT_RIGHT)
-    nico_bubble_resize_image = nico_bubble_image.resize((300, 300))
+    nico_bubble_resize_image = nico_bubble_image.resize((300//SCALE, 300//SCALE))
 
     if i != "":
         rock_image = Image.open(i+".jpg").convert("RGBA")
-        rock_resize_image = rock_image.resize((100,100))
+        rock_resize_image = rock_image.resize((100//SCALE,100//SCALE))
 
-        nico_bubble_resize_image.paste(rock_resize_image, (90,90), rock_resize_image)
+        nico_bubble_resize_image.paste(rock_resize_image, (90//SCALE,90//SCALE), rock_resize_image)
 
     return ImageTk.PhotoImage(nico_bubble_resize_image)
 
@@ -220,26 +225,26 @@ score_num.pack(pady = 5)
 game_frame = Frame(root, background="white")
 game_frame.pack(padx = 10, anchor="w")
 
-player_bubble_image = Image.open("bubble.png")
-player_bubble_resize_image = player_bubble_image.resize((300, 300))
+player_bubble_image = Image.open("bubble.png").convert("RGBA")
+player_bubble_resize_image = player_bubble_image.resize((300//SCALE, 300//SCALE))
 img1 = ImageTk.PhotoImage(player_bubble_resize_image)
 
 player_move = Label(game_frame, image=img1, text="", font ="normal 20 bold", compound="center", background="white")
-player_move.pack(side = LEFT, pady=10, padx = 200)
+player_move.pack(side = LEFT, pady=10//SCALE, padx = 200//SCALE)
 
 
-robot_bubble_image = Image.open("bubble.png").transpose(Image.FLIP_LEFT_RIGHT)
-robot_bubble_resize_image = robot_bubble_image.resize((300, 300))
+robot_bubble_image = Image.open("bubble.png").convert("RGBA").transpose(Image.FLIP_LEFT_RIGHT)
+robot_bubble_resize_image = robot_bubble_image.resize((300//SCALE, 300//SCALE))
 img3 = ImageTk.PhotoImage(robot_bubble_resize_image)
 
 robot_image = Image.open("robot.png")
-robot_resize_image = robot_image.resize((300, 400))
+robot_resize_image = robot_image.resize((300//SCALE, 400//SCALE))
 img2 = ImageTk.PhotoImage(robot_resize_image)
 robot = Label(game_frame, image=img2, background="white")
-robot.pack(side = RIGHT, pady=10, padx = 40)
+robot.pack(side = RIGHT, pady=10//SCALE, padx = 40//SCALE)
 
-robot_move = Label(game_frame, image=img3, text="Hi, I'm Nico. \n Nice to meet you! \n\n", font ="normal 20 bold", compound="center", background="white")
-robot_move.pack(side = RIGHT, pady=10, padx = 40)
+robot_move = Label(game_frame, image=img3, text="Hi, I'm Nico. \n Nice to meet you! \n\n", font ="normal 10 bold", compound="center", background="white")
+robot_move.pack(side = RIGHT, pady=10//SCALE, padx = 40//SCALE)
 
  
 frame1 = Frame(root, background="white")
