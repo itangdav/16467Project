@@ -2,8 +2,24 @@
   text-align: center;
   position: absolute;
   margin-left: calc(50% - 175px);
+  margin-bottom: calc(50% - 175px);
   top: calc(50% - 260px);
+  bottom: calc(50% - 260px);
+  /* height: 100%; */
 }
+
+/*
+.App .rsc {
+  height: 100%;
+}
+
+.App .rsc-container {
+  height: 100%;
+}
+
+.App .rsc-content {
+  height: calc(100% - 112px);
+} */
 
 .rps-component {
   width: 100%;

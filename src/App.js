@@ -10,22 +10,22 @@ import ScissorIcon from './icons/scissors.svg';
 const MoveIcons = [RockIcon, PaperIcon, ScissorIcon];
 const MoveNames = ["Rock", "Paper", "Scissors", "Shoot"];
 
-function getGameStatus(robotMove, humanMove, saidByRobot) {
+function getGameStatus(roundId, robotMove, humanMove, saidByRobot) {
   console.log(robotMove, humanMove);
   let res = (humanMove - robotMove + 3) % 3;
   if (res == 1) {
-    if (saidByRobot) return "robot-lose";
+    if (saidByRobot) return `round-${roundId}-robot-lose`;
     return "Human Wins!";
   } else if (res == 2) {
-    if (saidByRobot) return "robot-win";
+    if (saidByRobot) return `round-${roundId}-robot-win`;
     return "Robot Wins!";
   } else {
-    if (saidByRobot) return "tie";
+    if (saidByRobot) return `round-${roundId}-tie`;
     return "Tie!";
   }
 }
 
-function RPS({setSelected, triggerNextStep}) {
+function RPS({roundId, setSelected, triggerNextStep}) {
   const [localSelected, setLocalSelected] = useState(null);
   const [count, setCount] = useState(0);
 
@@ -39,11 +39,12 @@ function RPS({setSelected, triggerNextStep}) {
       setTextDisplay(MoveNames[count]+"!");
       setTimeout(() => {
         setCount(count+1);
-      }, 1000);
+      }, 500);
     }
     if (count == 4) {
-      setTextDisplay(getGameStatus(2, localSelected, false));
-      triggerNextStep({trigger: getGameStatus(2, localSelected, true)});
+      setTextDisplay(getGameStatus(roundId, 2, localSelected, false));
+      console.log(getGameStatus(roundId, 2, localSelected, true));
+      triggerNextStep({trigger: getGameStatus(roundId, 2, localSelected, true)});
     }
   }, [localSelected, count]);
 
@@ -130,49 +131,59 @@ function App() {
     {
       id: '7',
       message: "Great! Let's get started",
-      trigger: '9',
+      trigger: 'round-1',
     },
     {
       id: '8',
       message: "I am sorry but you don't have a choice :P",
-      trigger: '9',
+      trigger: 'round-1',
     },
   ];
 
-  const newRound = (startId) => {
+  const newRound = (roundId) => {
     return [
       {
-        id: String(startId),
-        component: <RPS setSelected={setPrevMove}/>,
+        id: `round-${roundId}`,
+        message: "Round "+String(roundId),
+        trigger: `round-${roundId}-rps`,
+      },
+      {
+        id: `round-${roundId}-rps`,
+        component: <RPS roundId={roundId} setSelected={setPrevMove}/>,
         waitAction: true,
       },
-    ]
+      {
+        id: `round-${roundId}-robot-win`,
+        message: "I WIN :D",
+        trigger: roundId==20 ? "thank" : `round-${roundId+1}`,
+      },
+      {
+        id: `round-${roundId}-robot-lose`,
+        message: "i lost :(",
+        trigger: roundId==20 ? "thank" : `round-${roundId+1}`,
+      },
+      {
+        id: `round-${roundId}-tie`,
+        message: "Oh, a tie.",
+        trigger: roundId==20 ? "thank" : `round-${roundId+1}`,
+      }
+    ];
   }
 
-  const declare = [
-    {
-      id: 'robot-win',
-      message: "I WIN :D",
-      trigger: "thank",
-    },
-    {
-      id: 'robot-lose',
-      message: "i lost :(",
-      trigger: "thank",
-    },
-    {
-      id: 'tie',
-      message: "Oh, a tie.",
-      trigger: "thank",
-    }
-  ];
+  let steps = starter;
 
-  let steps = starter.concat(newRound(starter.length + 1)).concat(declare);
+  for (let i=1; i<=20; i++) {
+    steps = steps.concat(newRound(i));
+    console.log(steps);
+  }
+
   steps.push({
     id: 'thank',
     message: "Thank you for playing!",
     end: true,
   });
+
+  console.log(steps);
 
   console.log(prevMove);
 
