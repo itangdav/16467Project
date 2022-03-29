@@ -1,3 +1,18 @@
+# The Short Version
+
+The app is created with React and the package [react-simple-chatbot](https://lucasbassetti.com.br/react-simple-chatbot/#/docs/installation).
+
+To run it locally on your computer, first install the packages required run:
+
+### `npm install`
+
+Then you can start the app by running:
+
+### `npm start`
+
+A webpage should automatically pop up.
+
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
