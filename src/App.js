@@ -10,12 +10,12 @@ import ScissorIcon from './icons/scissors.svg';
 const MoveIcons = [RockIcon, PaperIcon, ScissorIcon];
 const MoveNames = ["Rock", "Paper", "Scissors", "Shoot"];
 
-const cheatRound = [4, 8, 15];
+let cheatRounds = [4, 8, 15];
 
 // Pre-generated random sequence of moves
 const robotMoves = [2,2,1,2,0,1,2,0,0,1,0,1,0,2,1,2,2,1,0,1];
 
-const NUM_ROUNDS = 20;
+let NUM_ROUNDS = 20;
 const CONTROL = 0; // follows robotMoves - 20 rounds
 const VERBAL_CHEAT = 1; // change getGameStatus
 const ACTION_CHEAT = 2; // change RPS - add shuffle to winner
@@ -32,7 +32,7 @@ function getLosingMove(humanMove) {
 function getGameStatus(roundId, robotMove, humanMove, saidByRobot, cheat) {
   console.log(robotMove, humanMove);
   let res = (humanMove - robotMove + 3) % 3;
-  if (saidByRobot && cheat==VERBAL_CHEAT && cheatRound.includes(roundId)) {
+  if (saidByRobot && cheat==VERBAL_CHEAT && cheatRounds.includes(roundId)) {
     return `round-${roundId}-robot-win`;
   }
   if (res == 1) {
@@ -53,7 +53,7 @@ function RPS({roundId, cheat, setSelected, triggerNextStep}) {
 
   const getRobotMove = (initial) => {
     if (cheat == VERBAL_CHEAT || cheat == ACTION_CHEAT) {
-      if (!cheatRound.includes(roundId)) {
+      if (!cheatRounds.includes(roundId)) {
         return robotMoves[roundId - 1];
       }
       if (initial) {
@@ -62,7 +62,7 @@ function RPS({roundId, cheat, setSelected, triggerNextStep}) {
         return getWinningMove(humanMove);
       }
     } if (cheat == HIDDEN_CHEAT) {
-      if (cheatRound.includes(roundId)) {
+      if (cheatRounds.includes(roundId)) {
         return getLosingMove(humanMove);
       } else {
         return getWinningMove(humanMove);
@@ -90,7 +90,7 @@ function RPS({roundId, cheat, setSelected, triggerNextStep}) {
         false, //saidByBot
         cheat));
       if (cheat != ACTION_CHEAT || 
-        !(cheatRound.includes(roundId))) {
+        !(cheatRounds.includes(roundId))) {
         triggerNextStep(
           {
             trigger: 
@@ -159,7 +159,7 @@ function RPS({roundId, cheat, setSelected, triggerNextStep}) {
   <div className="rps-display">
     <div className={
       "move" + (count<4 ? " rps-in-play":"") 
-      + (cheatRound.includes(roundId) && cheat == ACTION_CHEAT ? 
+      + (cheatRounds.includes(roundId) && cheat == ACTION_CHEAT ? 
         " action-cheat" + (count<4 ? "":" cheated")
         :"")
     }>
@@ -167,7 +167,7 @@ function RPS({roundId, cheat, setSelected, triggerNextStep}) {
         MoveIcons[getRobotMove(true)]}
       />
       {
-        cheatRound.includes(roundId) && cheat == ACTION_CHEAT && 
+        cheatRounds.includes(roundId) && cheat == ACTION_CHEAT && 
         <img className="cheat" src={
           MoveIcons[getRobotMove(false)]}
         />
@@ -191,6 +191,21 @@ function App() {
   // Get URL parameter
   const URLparams = new URLSearchParams(window.location.search);
   const bot = Number.parseInt(URLparams.get("bot"));
+  const inputRounds = URLparams.get("n_rounds");
+  const inputCheatRounds = URLparams.get("cheat_rounds");
+  let hasStarter = URLparams.get("starter");
+
+  if (inputRounds) {
+    NUM_ROUNDS = Number.parseInt(inputRounds);
+  }
+  if (inputCheatRounds) {
+    cheatRounds = JSON.parse(inputCheatRounds);
+  } 
+  if (hasStarter == "false") {
+    hasStarter = false;
+  } else {
+    hasStarter = true;
+  }
 
   const [prevMove, setPrevMove] = useState(null);
 
@@ -271,8 +286,10 @@ function App() {
     ];
   }
 
-  // let steps = starter;
   let steps = [];
+  if (hasStarter) {
+    steps = starter;
+  }
 
   for (let i=1; i<=NUM_ROUNDS; i++) {
     steps = steps.concat(newRound(i));
