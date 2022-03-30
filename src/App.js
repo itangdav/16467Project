@@ -10,9 +10,31 @@ import ScissorIcon from './icons/scissors.svg';
 const MoveIcons = [RockIcon, PaperIcon, ScissorIcon];
 const MoveNames = ["Rock", "Paper", "Scissors", "Shoot"];
 
-function getGameStatus(roundId, robotMove, humanMove, saidByRobot) {
+const cheatRound = [4, 8, 15];
+
+// Pre-generated random sequence of moves
+const robotMoves = [2,2,1,2,0,1,2,0,0,1,0,1,0,2,1,2,2,1,0,1];
+
+const NUM_ROUNDS = 20;
+const CONTROL = 0; // follows robotMoves - 20 rounds
+const VERBAL_CHEAT = 1; // change getGameStatus
+const ACTION_CHEAT = 2; // change RPS - add shuffle to winner
+const HIDDEN_CHEAT = 3; // change RPS - don't use randomMove - 20 rounds 
+
+function getWinningMove(humanMove) {
+  return (humanMove+1)%3;
+}
+
+function getLosingMove(humanMove) {
+  return (humanMove+2)%3;
+}
+
+function getGameStatus(roundId, robotMove, humanMove, saidByRobot, cheat) {
   console.log(robotMove, humanMove);
   let res = (humanMove - robotMove + 3) % 3;
+  if (saidByRobot && cheat==VERBAL_CHEAT && cheatRound.includes(roundId)) {
+    return `round-${roundId}-robot-win`;
+  }
   if (res == 1) {
     if (saidByRobot) return `round-${roundId}-robot-lose`;
     return "Human Wins!";
@@ -25,16 +47,35 @@ function getGameStatus(roundId, robotMove, humanMove, saidByRobot) {
   }
 }
 
-function RPS({roundId, setSelected, triggerNextStep}) {
-  const [localSelected, setLocalSelected] = useState(null);
+function RPS({roundId, cheat, setSelected, triggerNextStep}) {
+  const [humanMove, setHumanMove] = useState(null);
   const [count, setCount] = useState(0);
 
-  let randomMove = 2; //
+  const getRobotMove = (initial) => {
+    if (cheat == VERBAL_CHEAT || cheat == ACTION_CHEAT) {
+      if (!cheatRound.includes(roundId)) {
+        return robotMoves[roundId - 1];
+      }
+      if (initial) {
+        return getLosingMove(humanMove);
+      } else {
+        return getWinningMove(humanMove);
+      }
+    } if (cheat == HIDDEN_CHEAT) {
+      if (cheatRound.includes(roundId)) {
+        return getLosingMove(humanMove);
+      } else {
+        return getWinningMove(humanMove);
+      }
+    } else {
+      return robotMoves[roundId - 1];
+    }
+  }
 
   const [textDisplay, setTextDisplay] = useState("Pick a Move!");
 
   useEffect(() => {
-    if (localSelected != null && count < 4) {
+    if (humanMove != null && count < 4) {
       console.log("Hi!");
       setTextDisplay(MoveNames[count]+"!");
       setTimeout(() => {
@@ -42,11 +83,53 @@ function RPS({roundId, setSelected, triggerNextStep}) {
       }, 500);
     }
     if (count == 4) {
-      setTextDisplay(getGameStatus(roundId, 2, localSelected, false));
-      console.log(getGameStatus(roundId, 2, localSelected, true));
-      triggerNextStep({trigger: getGameStatus(roundId, 2, localSelected, true)});
+      setTextDisplay(getGameStatus(
+        roundId, 
+        getRobotMove(true), 
+        humanMove,
+        false, //saidByBot
+        cheat));
+      if (cheat != ACTION_CHEAT || 
+        !(cheatRound.includes(roundId))) {
+        triggerNextStep(
+          {
+            trigger: 
+            getGameStatus(
+              roundId, 
+              getRobotMove(false), 
+              humanMove, 
+              true, //saidByBot
+              cheat)
+          }
+        );
+      } else {
+        setTimeout(() => {
+          setCount(count+1);
+        }, 2000);
+      }
     }
-  }, [localSelected, count]);
+    // Only happens when action cheat
+    if (count == 5) {
+      setTextDisplay(getGameStatus(
+        roundId, 
+        getRobotMove(false), 
+        humanMove,
+        false, //saidByBot
+        cheat)
+      );
+      triggerNextStep(
+        {
+          trigger: 
+          getGameStatus(
+            roundId, 
+            getRobotMove(false), 
+            humanMove, 
+            true, //saidByBot
+            cheat)
+        }
+      );
+    }
+  }, [humanMove, count]);
 
   const pickDisplay = 
   <div className="rps-display">
@@ -67,30 +150,48 @@ function RPS({roundId, setSelected, triggerNextStep}) {
       ]}
       setSelected={(i) => {
         setSelected(i);
-        setLocalSelected(i);
+        setHumanMove(i);
       }}
     />
   </div>;
 
   const playingDisplay = 
   <div className="rps-display">
-    <div className={"move human-move" + (count<4 ? " rps-in-play":"")}>
-      <img src={MoveIcons[randomMove]}/>
+    <div className={
+      "move" + (count<4 ? " rps-in-play":"") 
+      + (cheatRound.includes(roundId) && cheat == ACTION_CHEAT ? 
+        " action-cheat" + (count<4 ? "":" cheated")
+        :"")
+    }>
+      <img src={
+        MoveIcons[getRobotMove(true)]}
+      />
+      {
+        cheatRound.includes(roundId) && cheat == ACTION_CHEAT && 
+        <img className="cheat" src={
+          MoveIcons[getRobotMove(false)]}
+        />
+      }
     </div>
-    <div className={"move human-move" + (count<4 ? " rps-in-play":"")}>
-      <img src={MoveIcons[localSelected]}/>
+
+    <div className={"move" + (count<4 ? " rps-in-play":"")}>
+      <img src={MoveIcons[humanMove]}/>
     </div>
   </div>;
 
   return (
     <div className="rps-component">
       <h2 className="rps-text">{textDisplay}</h2>
-      {localSelected==null ? pickDisplay : playingDisplay}
+      {humanMove==null ? pickDisplay : playingDisplay}
     </div>
   )
 }
 
 function App() {
+  // Get URL parameter
+  const URLparams = new URLSearchParams(window.location.search);
+  const bot = Number.parseInt(URLparams.get("bot"));
+
   const [prevMove, setPrevMove] = useState(null);
 
   const starter = [
@@ -149,30 +250,31 @@ function App() {
       },
       {
         id: `round-${roundId}-rps`,
-        component: <RPS roundId={roundId} setSelected={setPrevMove}/>,
+        component: <RPS roundId={roundId} cheat={bot} setSelected={setPrevMove}/>,
         waitAction: true,
       },
       {
         id: `round-${roundId}-robot-win`,
-        message: "I WIN :D",
-        trigger: roundId==20 ? "thank" : `round-${roundId+1}`,
+        message: "YES, I WIN :D",
+        trigger: roundId==NUM_ROUNDS ? "thank" : `round-${roundId+1}`,
       },
       {
         id: `round-${roundId}-robot-lose`,
-        message: "i lost :(",
-        trigger: roundId==20 ? "thank" : `round-${roundId+1}`,
+        message: "aw, you win :(",
+        trigger: roundId==NUM_ROUNDS ? "thank" : `round-${roundId+1}`,
       },
       {
         id: `round-${roundId}-tie`,
-        message: "Oh, a tie.",
-        trigger: roundId==20 ? "thank" : `round-${roundId+1}`,
+        message: "Oh, we have tied this round.",
+        trigger: roundId==NUM_ROUNDS ? "thank" : `round-${roundId+1}`,
       }
     ];
   }
 
-  let steps = starter;
+  // let steps = starter;
+  let steps = [];
 
-  for (let i=1; i<=20; i++) {
+  for (let i=1; i<=NUM_ROUNDS; i++) {
     steps = steps.concat(newRound(i));
     console.log(steps);
   }
