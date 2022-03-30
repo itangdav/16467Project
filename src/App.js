@@ -30,7 +30,7 @@ function getLosingMove(humanMove) {
 }
 
 function getGameStatus(roundId, robotMove, humanMove, saidByRobot, cheat) {
-  console.log(robotMove, humanMove);
+  // console.log(robotMove, humanMove);
   let res = (humanMove - robotMove + 3) % 3;
   if (saidByRobot && cheat==VERBAL_CHEAT && cheatRounds.includes(roundId)) {
     return `round-${roundId}-robot-win`;
@@ -76,7 +76,7 @@ function RPS({roundId, cheat, setSelected, triggerNextStep}) {
 
   useEffect(() => {
     if (humanMove != null && count < 4) {
-      console.log("Hi!");
+      // console.log("Hi!");
       setTextDisplay(MoveNames[count]+"!");
       setTimeout(() => {
         setCount(count+1);
@@ -206,6 +206,7 @@ function App() {
   } else {
     hasStarter = true;
   }
+  console.log(bot, inputRounds, inputCheatRounds, hasStarter);
 
   const [prevMove, setPrevMove] = useState(null);
 
@@ -293,7 +294,7 @@ function App() {
 
   for (let i=1; i<=NUM_ROUNDS; i++) {
     steps = steps.concat(newRound(i));
-    console.log(steps);
+    // console.log(steps);
   }
 
   steps.push({
@@ -302,9 +303,9 @@ function App() {
     end: true,
   });
 
-  console.log(steps);
+  // console.log(steps);
 
-  console.log(prevMove);
+  // console.log(prevMove);
 
   return (
     <div className="App">
